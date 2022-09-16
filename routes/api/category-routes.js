@@ -31,7 +31,7 @@ router.get("/:id", async (req, res) => {
     if (!oneCategory) {
       res.status(404).json({ message: "Category not found" });
     }
-    res.status(200).json(category);
+    res.status(200).json(oneCategory);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -82,7 +82,6 @@ router.delete("/:id", async (req, res) => {
       where: { id: req.params.id },
     });
     res.json(delCategory);
-    res.status(200).json({ message: "Category deleted" });
   } catch (err) {
     res
       .status(500)

@@ -3,12 +3,12 @@ const { Product, Category, Tag, ProductTag } = require("../../models");
 
 // The `/api/products` endpoint
 
-// get all products
-router.get("/", async (req, res) => {
+// get all productsTags
+router.get("/", (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
   Product.findAll({
-    attributes: ["id", "product_name", "price", "stock"],
+    attributes: ["id", "product_id", "tag_id"],
     include: [
       {
         model: Tag,
@@ -19,26 +19,22 @@ router.get("/", async (req, res) => {
         attributes: ["category_name"],
       },
     ],
-  }).then((dbProductData) => res.json(dbProductData));
-  try {
-    const products = await Product.findAll({
-      include: [Category, { model: Tag, through: ProductTag }],
+  })
+    .then((dbProductTagData) => res.json(dbProductTagData))
+    .catch((err) => {
+      res.status(500).json(err);
     });
-  } catch (err) {
-    res.status(500).json(err);
-  }
 });
 
 // get one product
 router.get("/:id", async (req, res) => {
   // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
   try {
     const singleProduct = await Product.findOne({
       where: {
         id: req.params.id,
       },
-      attributes: ["id", "product_name", "price", "stock"],
+      attributes: ["id", "product_id", "tag_id"],
       include: [
         {
           model: Tag,
@@ -50,12 +46,9 @@ router.get("/:id", async (req, res) => {
         },
       ],
     });
-    if (!singleProduct) {
-      res.status(404).json({ message: "Product not found" });
-      return;
-    }
-    res.status(200).json(err);
+    res.json(singleProduct);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });
@@ -78,12 +71,12 @@ router.post("/", (req, res) => {
         });
         return ProductTag.bulkCreate(productTagIdArray);
       }
-      if (!product) {
-        res.status(404).json({ message: "Product not found" });
-        return;
-      }
+      res.status(200).json(product);
     })
-    .then((productTagIds) => res.status(200).json(productTagIds));
+    .then((productTagIds) => res.status(200).json(productTagIds))
+    .catch((err) => {
+      res.status(400).json(err);
+    });
 });
 
 // update product
